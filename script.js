@@ -1,14 +1,12 @@
-// Load products from localStorage or default
 let products = JSON.parse(localStorage.getItem("products")) || [
   { id: 1, name: "Premium Sneakers", price: 3200, image: "images/sneakers.jpg", color: "#000" },
   { id: 2, name: "Smart Watch", price: 5999, image: "images/watch.jpg", color: "#ff9900" },
-  { id: 3, name: "Bluetooth Speaker", price: 2199, image: "images/speaker.jpg", color: "#00bcd4" },
-  { id: 4, name: "Wireless Headphones", price: 3999, image: "images/headphones.jpg", color: "#4caf50" }
+  { id: 3, name: "Bluetooth Speaker", price: 2199, image: "images/speaker.jpg", color: "#00bcd4" }
 ];
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-// ✅ Display products on products.html
+// Display products on the page
 function showProducts() {
   const productList = document.getElementById("product-list");
   if (!productList) return;
@@ -26,7 +24,6 @@ function showProducts() {
   });
 }
 
-// ✅ Add to Cart
 function addToCart(id) {
   const product = products.find(p => p.id === id);
   cart.push(product);
@@ -34,7 +31,7 @@ function addToCart(id) {
   alert(product.name + " added to cart!");
 }
 
-// ✅ Show Cart
+// Show cart
 function showCart() {
   const cartItems = document.getElementById("cart-items");
   if (!cartItems) return;
@@ -52,27 +49,42 @@ function showCart() {
   document.getElementById("total").innerText = "Total: PKR " + total;
 }
 
-// ✅ Remove item from Cart
 function removeItem(index) {
   cart.splice(index, 1);
   localStorage.setItem("cart", JSON.stringify(cart));
   location.reload();
 }
 
-// ✅ Checkout Form
-function handleCheckout() {
-  const checkoutForm = document.getElementById("checkout-form");
-  if (!checkoutForm) return;
-  checkoutForm.addEventListener("submit", e => {
+// Admin panel logic
+function handleAdminForm() {
+  const adminForm = document.getElementById("admin-form");
+  if (!adminForm) return;
+  adminForm.addEventListener("submit", e => {
     e.preventDefault();
-    alert("Order placed successfully! (Fictional)");
-    cart = [];
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.location.href = "index.html";
+    const name = document.getElementById("product-name").value;
+    const price = parseInt(document.getElementById("product-price").value);
+    const imageInput = document.getElementById("product-image");
+    const color = document.getElementById("product-color").value;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const newProduct = {
+        id: Date.now(),
+        name,
+        price,
+        image: reader.result,
+        color: color
+      };
+      products.push(newProduct);
+      localStorage.setItem("products", JSON.stringify(products));
+      alert("Product Added!");
+      location.reload();
+    };
+    reader.readAsDataURL(imageInput.files[0]);
   });
 }
 
-// ✅ Admin Panel (Add New Products with Image Upload and Color)
+// Show products in the admin panel
 function showAdminProducts() {
   const adminList = document.getElementById("admin-product-list");
   if (!adminList) return;
@@ -96,40 +108,9 @@ function deleteProduct(index) {
   location.reload();
 }
 
-function handleAdminForm() {
-  const adminForm = document.getElementById("admin-form");
-  if (!adminForm) return;
-  adminForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const name = document.getElementById("product-name").value;
-    const price = parseInt(document.getElementById("product-price").value);
-    const imageInput = document.getElementById("product-image");
-    const color = document.getElementById("product-color").value;
-
-    // Convert image to Base64 for storing
-    const reader = new FileReader();
-    reader.onload = function () {
-      const newProduct = {
-        id: Date.now(),
-        name,
-        price,
-        image: reader.result, // base64 image
-        color: color
-      };
-      products.push(newProduct);
-      localStorage.setItem("products", JSON.stringify(products));
-      alert("Product Added!");
-      location.reload();
-    };
-    reader.readAsDataURL(imageInput.files[0]);
-  });
-}
-
-// ✅ Run on Page Load
 window.addEventListener("DOMContentLoaded", () => {
   showProducts();
   showCart();
-  handleCheckout();
-  showAdminProducts();
   handleAdminForm();
+  showAdminProducts();
 });
